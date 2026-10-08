@@ -1,25 +1,25 @@
-# Holt jeden Morgen die Kaufland-Angebote und speichert sie in angebote.json.
+﻿# Holt jeden Morgen die Kaufland-Angebote und speichert sie in angebote.json.
 name: Angebote abholen
 
 on:
   schedule:
-    - cron: "17 4 * * *" # täglich ca. 6:17 Uhr (Sommerzeit) bzw. 5:17 Uhr (Winterzeit)
+    - cron: "17 4 * * *" # tÃ¤glich ca. 6:17 Uhr (Sommerzeit) bzw. 5:17 Uhr (Winterzeit)
   workflow_dispatch: # erlaubt "Run workflow" per Hand
 
 permissions:
-  contents: write # nötig, um angebote.json zu speichern
+  contents: write # nÃ¶tig, um angebote.json zu speichern
 
 jobs:
   abholen:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           node-version: 22
       - run: node abholen.mjs
-      - name: Speichern, falls sich etwas geändert hat
+      - name: Speichern, falls sich etwas geÃ¤ndert hat
         run: |
           git config user.name "angebote-bot"
           git config user.email "angebote-bot@users.noreply.github.com"
