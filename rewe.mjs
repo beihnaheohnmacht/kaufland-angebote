@@ -7,7 +7,7 @@
 // Sonst gibt es nur den Namen, ohne Preis (wie bei Lidl) – lieber kein Preis als ein falscher.
 import { BROWSER, kalenderwoche, sauber, speichern } from "./gemeinsam.mjs";
 
-const MARKT = "1350078"; // Rewe Berlin, Bruno-Taut-Str. 1
+const MARKT = process.env.REWE_MARKT || "1350078"; // Rewe Berlin, Bruno-Taut-Str. 1 (anderer Markt nur zum Testen)
 const DATEN = (name) => `https://view.publitas.com/rewe-markt/${name}/spreads.json`;
 
 // Zeilen, die zum Produkt gehören, aber nicht zum Namen
@@ -118,8 +118,11 @@ for (const { jahr, woche } of wochen) {
   }
 }
 
-if (angebote.size === 0) {
-  console.error("Keine Rewe-Angebote gefunden");
+// Schutz vor Gestaltungsänderungen: Normal sind gut 200 Angebote, gut 70 % mit Preis (getestet KW 42/2026 mit 8 Märkten).
+// Fällt das Ergebnis stark ab, lieber die alte rewe.json behalten und im Ablauf als Fehler melden.
+const mitPreis = [...angebote.values()].filter((a) => a.preis).length;
+if (angebote.size < 80 || mitPreis < angebote.size * 0.3) {
+  console.error(`Rewe-Ergebnis ungewöhnlich (${angebote.size} Angebote, ${mitPreis} mit Preis) – Prospekt-Gestaltung geändert? rewe.json bleibt unverändert.`);
   process.exit(1);
 }
-speichern("rewe.json", "rewe", MARKT, [...angebote.values()]);
+speichern(process.env.REWE_DATEI || "rewe.json", "rewe", MARKT, [...angebote.values()]);
