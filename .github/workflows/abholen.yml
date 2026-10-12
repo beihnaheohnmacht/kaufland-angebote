@@ -1,4 +1,4 @@
-# Holt jeden Morgen die Kaufland-Angebote und speichert sie in angebote.json.
+# Holt jeden Morgen die Angebote (Kaufland, Netto, Lidl) und speichert sie als JSON-Dateien.
 name: Angebote abholen
 
 on:
@@ -18,10 +18,19 @@ jobs:
       - uses: actions/setup-node@v5
         with:
           node-version: 22
-      - run: node abholen.mjs
+      # Jeder Markt für sich: klappt einer nicht, werden die anderen trotzdem gespeichert
+      - name: Kaufland
+        run: node abholen.mjs
+        continue-on-error: true
+      - name: Netto
+        run: node netto.mjs
+        continue-on-error: true
+      - name: Lidl
+        run: node lidl.mjs
+        continue-on-error: true
       - name: Speichern, falls sich etwas geändert hat
         run: |
           git config user.name "angebote-bot"
           git config user.email "angebote-bot@users.noreply.github.com"
-          git add angebote.json
+          git add angebote.json netto.json lidl.json
           git diff --cached --quiet || (git commit -m "Angebote $(date +%F)" && git push)
